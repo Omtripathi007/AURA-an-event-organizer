@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA — Login & Signup</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 24px 60px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .auth-card {
+            background: var(--deep);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            width: 100%;
+            max-width: 480px;
+            padding: 48px;
+            box-shadow: 0 30px 80px rgba(0, 118, 255, 0.1);
+            animation: fadeUp 0.8s ease-out;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            background: rgba(0, 118, 255, 0.05);
+            padding: 6px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            cursor: none;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            background: var(--purple);
+            color: #fff;
+            box-shadow: 0 6px 15px rgba(0, 118, 255, 0.25);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(0, 118, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px 18px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--purple);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(0, 118, 255, 0.1);
+        }
+
+        .auth-btn {
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .auth-footer {
+            margin-top: 32px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .auth-footer a {
+            color: var(--purple-light);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .type-indicator {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .type-indicator span {
+            color: var(--purple);
+        }
+
+        .back-home {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: color 0.3s;
+            z-index: 10;
+        }
+
+        .back-home:hover {
+            color: var(--purple);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Custom Cursor -->
+    <div id="cursor"></div>
+    <div id="cursor-ring"></div>
+
+    <!-- BG Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <a href="index.html" class="back-home">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Back to Gallery
+    </a>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="nav-logo" style="margin-bottom: 24px; justify-content: center; display: flex;">AURA</div>
+                <div id="form-title" class="type-indicator">Welcome <span>User</span></div>
+                <p id="form-subtitle" class="section-label" style="font-size: 0.6rem; opacity: 0.7;">Access your premium
+                    tickets</p>
+            </div>
+
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchMode('user')">As User</div>
+                <div class="auth-tab" onclick="switchMode('hoster')">As Hoster</div>
+            </div>
+
+            <form id="auth-form" onsubmit="event.preventDefault()">
+                <div class="form-group" id="name-group" style="display: none;">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="auth-name" class="form-input" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" id="auth-email" class="form-input" placeholder="name@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="auth-password" class="form-input" placeholder="••••••••">
+                </div>
+                <button class="btn-primary auth-btn" id="submit-btn">Continue</button>
+            </form>
+
+            <div class="auth-footer">
+                <span id="toggle-text">Don't have an account?</span>
+                <a href="#" id="toggle-link" onclick="toggleAuth()">Sign Up</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let currentMode = 'user';
+        let isLogin = true;
+
+        function switchMode(mode) {
+            currentMode = mode;
+            const tabs = document.querySelectorAll('.auth-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            if (mode === 'user') {
+                tabs[0].classList.add('active');
+                document.getElementById('form-title').innerHTML = isLogin ? 'Welcome <span>User</span>' : 'Join as <span>User</span>';
+                document.getElementById('form-subtitle').innerText = isLogin ? 'Access your premium tickets' : 'Start discovering extraordinary events';
+            } else {
+                tabs[1].classList.add('active');
+                document.getElementById('form-title').innerHTML = isLogin ? 'Welcome <span>Hoster</span>' : 'Join as <span>Hoster</span>';
+                document.getElementById('form-subtitle').innerText = isLogin ? 'Manage your event empire' : 'Start hosting elite experiences';
+            }
+        }
+
+        function toggleAuth() {
+            isLogin = !isLogin;
+            const title = document.getElementById('form-title');
+            const submitBtn = document.getElementById('submit-btn');
+            const toggleText = document.getElementById('toggle-text');
+            const toggleLink = document.getElementById('toggle-link');
+            const nameGroup = document.getElementById('name-group');
+
+            if (isLogin) {
+                switchMode(currentMode); // refreshes title/subtitle
+                submitBtn.innerText = 'Continue';
+                toggleText.innerText = "Don't have an account?";
+                toggleLink.innerText = 'Sign Up';
+                nameGroup.style.display = 'none';
+            } else {
+                title.innerHTML = `Join as <span>${currentMode === 'user' ? 'User' : 'Hoster'}</span>`;
+                submitBtn.innerText = 'Create Account';
+                toggleText.innerText = "Already have an account?";
+                toggleLink.innerText = 'Login';
+                nameGroup.style.display = 'block';
+            }
+        }
+
+        // Check for query params
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const type = urlParams.get('type');
+            if (type === 'hoster') switchMode('hoster');
+            else if (type === 'user') switchMode('user');
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AURA — Premium Event Platform</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- ─── SPLASH SCREEN ─── -->
+    <div id="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo">AURA</div>
+            <div class="splash-loader"></div>
+        </div>
+    </div>
+
+    <!-- Custom Cursor -->
+    <div id="cursor"></div>
+    <div id="cursor-ring"></div>
+
+    <!-- BG Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <!-- NAV -->
+    <nav id="mainNav">
+        <div class="nav-logo" onclick="window.location.href='index.html'">AURA</div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="index.html#events">Events</a>
+            <a href="explore-events.html">Explore</a>
+            <a href="user-dashboard.html">My Tickets</a>
+            <a href="login-signup.html" class="nav-btn">Register Now</a>
+        </div>
+    </nav>
+
+    <div class="wrapper">
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="particles" id="particles"></div>
+
+            <p class="hero-label">✦ The Premier Event Experience Platform</p>
+            <h1 class="hero-title">
+                <span>Discover &amp;</span>
+                <span><em>Curate</em> Events</span>
+                <span>Unlike Any Other</span>
+            </h1>
+            <p class="hero-sub">From intimate gallery openings to stadium spectacles — find, book, and manage
+                extraordinary experiences in one seamless platform.</p>
+            <div class="hero-actions">
+                <a href="explore-events.html" class="btn-primary">Explore Events</a>
+                <a href="login-signup.html?type=hoster" class="btn-ghost">Become a Host</a>
+            </div>
+
+            <!-- 3D Rotating Diamond -->
+            <div class="diamond-wrap">
+                <div class="diamond">
+                    <div class="diamond-inner"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STATS -->
+        <div class="stats-bar reveal">
+            <div class="stat-item">
+                <div class="stat-num" data-target="12400">0</div>
+                <div class="stat-label">Events Hosted</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" data-target="840000">0</div>
+                <div class="stat-label">Tickets Sold</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" data-target="5200">0</div>
+                <div class="stat-label">Verified Organizers</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" data-target="98">0</div>
+                <div class="stat-label">% Satisfaction</div>
+            </div>
+        </div>
+
+        <!-- TICKER -->
+        <div class="ticker-wrap">
+            <div class="ticker">
+                <span class="ticker-item"><span>✦</span> Jazz Night at The Grand</span>
+                <span class="ticker-item"><span>✦</span> Web Summit 2025 — Lisbon</span>
+                <span class="ticker-item"><span>✦</span> Neon Art Exhibition</span>
+                <span class="ticker-item"><span>✦</span> Michelin Dinner Series</span>
+                <span class="ticker-item"><span>✦</span> Runway Show: AW Collection</span>
+                <span class="ticker-item"><span>✦</span> EDM Festival — Ibiza</span>
+                <span class="ticker-item"><span>✦</span> Jazz Night at The Grand</span>
+                <span class="ticker-item"><span>✦</span> Web Summit 2025 — Lisbon</span>
+                <span class="ticker-item"><span>✦</span> Neon Art Exhibition</span>
+                <span class="ticker-item"><span>✦</span> Michelin Dinner Series</span>
+                <span class="ticker-item"><span>✦</span> Runway Show: AW Collection</span>
+                <span class="ticker-item"><span>✦</span> EDM Festival — Ibiza</span>
+            </div>
+        </div>
+
+        <!-- EVENTS -->
+        <section id="events">
+            <div class="container">
+                <div class="events-header reveal">
+                    <p class="section-label">✦ Upcoming Events</p>
+                    <h2 class="section-title">Extraordinary <em>Experiences</em><br />Await You</h2>
+                </div>
+                <div class="events-grid" id="home-events">
+                    <p style="text-align:center; grid-column: 1/-1;">Curating experiences...</p>
+                </div>
+            </div>
+        </section>
+
+        <script>
+            window.addEventListener('DOMContentLoaded', () => {
+                if (typeof loadEvents === 'function') {
+                    loadEvents('home-events');
+                }
+            });
+        </script>
+    </div>
+    </section>
+
+    <!-- FEATURED -->
+    <section id="featured" class="featured-section">
+        <div class="container">
+            <div class="reveal">
+                <p class="section-label">✦ Editor's Picks</p>
+                <h2 class="section-title">Featured &amp; <em>Exclusive</em></h2>
+            </div>
+            <div class="featured-grid">
+                <div class="feat-big reveal">
+                    <div class="feat-big-img">🌌</div>
+                    <div class="feat-big-body">
+                        <span class="card-tag">✦ Exclusive</span>
+                        <div class="card-date">Jun 7, 2025 · Rooftop Arena, NY</div>
+                        <h3 class="card-title">Celestial: The Largest Laser Symphony in History</h3>
+                        <p class="card-desc"
+                            style="color:var(--muted);font-size:.88rem;line-height:1.75;margin-bottom:24px;">A
+                            once-in-a-generation event. 120 musicians, 40 laser artists, and a 360° immersive dome
+                            above New York City. Limited to 500 guests.</p>
+                        <div
+                            style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+                            <div
+                                style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;">
+                                From $895</div>
+                            <button class="btn-primary" style="font-size:.75rem;padding:12px 28px;">Reserve Your
+                                Seat</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="feat-small reveal">
+                    <div class="feat-small-icon">🎭</div>
+                    <div class="feat-small-info">
+                        <div class="card-date">May 30 · London</div>
+                        <h3 class="card-title">Opera in the Dark</h3>
+                        <p class="card-desc">Blindfolded opera — a sensory journey through Puccini's greatest works
+                            without sight.</p>
+                    </div>
+                </div>
+                <div class="feat-small reveal">
+                    <div class="feat-small-icon">🏔️</div>
+                    <div class="feat-small-info">
+                        <div class="card-date">Jun 2 · Swiss Alps</div>
+                        <h3 class="card-title">Summit Startup Retreat</h3>
+                        <p class="card-desc">Three days of high-altitude strategy sessions with 40 hand-picked
+                            founders and investors.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how">
+        <div class="container">
+            <div class="reveal" style="text-align:center;max-width:600px;margin:0 auto 0;">
+                <p class="section-label">✦ The Process</p>
+                <h2 class="section-title">How <em>Aura</em> Works</h2>
+            </div>
+            <div class="how-grid">
+                <div class="how-card reveal">
+                    <div class="how-num">01</div>
+                    <div class="how-icon">🔍</div>
+                    <h3 class="how-title">Discover</h3>
+                    <p class="how-desc">Browse thousands of curated events filtered by category, city, date, or
+                        mood. Our AI recommends what you'll love.</p>
+                </div>
+                <div class="how-card reveal">
+                    <div class="how-num">02</div>
+                    <div class="how-icon">🎟️</div>
+                    <h3 class="how-title">Book Instantly</h3>
+                    <p class="how-desc">Secure your tickets in seconds with our encrypted checkout. NFT-verified
+                        tickets eliminate fraud entirely.</p>
+                </div>
+                <div class="how-card reveal">
+                    <div class="how-num">03</div>
+                    <div class="how-icon">✨</div>
+                    <h3 class="how-title">Experience</h3>
+                    <p class="how-desc">Scan your digital pass, enjoy the event, and unlock exclusive post-event
+                        content and offers.</p>
+                </div>
+                <div class="how-card reveal">
+                    <div class="how-num">04</div>
+                    <div class="how-icon">🚀</div>
+                    <h3 class="how-title">Host & Earn</h3>
+                    <p class="how-desc">Publish your own event in minutes. Our tools handle ticketing, marketing,
+                        and analytics — you focus on the experience.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section id="testimonials" class="testimonials">
+        <div class="container">
+            <div class="reveal" style="text-align:center;max-width:500px;margin:0 auto;">
+                <p class="section-label">✦ Testimonials</p>
+                <h2 class="section-title">Loved by <em>Thousands</em></h2>
+            </div>
+            <div class="testi-grid">
+                <div class="testi-card reveal">
+                    <p class="testi-quote">Aura transformed how I discover events. The curation is impeccable —
+                        every event I've attended has been extraordinary.</p>
+                    <div class="testi-author">
+                        <div class="testi-avatar">👩</div>
+                        <div>
+                            <div class="testi-name">AYUSH MISHRA</div>
+                            <div class="testi-role">Creative Director, Paris</div>
+                            <div class="testi-stars">★★★★★</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testi-card reveal">
+                    <p class="testi-quote">Hosted our product launch through Aura — 2,000 attendees, zero technical
+                        issues. The platform is in a class of its own.</p>
+                    <div class="testi-author">
+                        <div class="testi-avatar">👨</div>
+                        <div>
+                            <div class="testi-name">KARTIK GULERIA</div>
+                            <div class="testi-role">Founder & CEO, RAILQUICK</div>
+                            <div class="testi-stars">★★★★★</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testi-card reveal">
+                    <p class="testi-quote">The NFT ticketing eliminated scalpers at our show. Every seat was in the
+                        right hands. I'll never use another platform.</p>
+                    <div class="testi-author">
+                        <div class="testi-avatar">🎤</div>
+                        <div>
+                            <div class="testi-name">SOFIA</div>
+                            <div class="testi-role">Performing Artist</div>
+                            <div class="testi-stars">★★★★★</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="cta-glow"></div>
+        <div class="container" style="position:relative;z-index:1;">
+            <p class="section-label reveal">✦ Get Started Today</p>
+            <h2 class="section-title reveal">Ready to Experience<br /><em>Something Unforgettable?</em></h2>
+            <p class="cta-desc reveal">Join over 840,000 event-goers and 5,000 organizers who trust Aura for the
+                world's most extraordinary events.</p>
+            <div class="hero-actions reveal">
+                <a href="explore-events.html" class="btn-primary">Browse All Events</a>
+                <a href="login-signup.html?type=hoster" class="btn-ghost">Start Hosting Free</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <div class="nav-logo">AURA</div>
+                <p>The premium platform for extraordinary events. Discover, book, and host experiences that matter.
+                </p>
+            </div>
+            <div class="footer-col">
+                <h4>Discover</h4>
+                <a href="#">Music &amp; Concerts</a>
+                <a href="#">Technology</a>
+                <a href="#">Art &amp; Culture</a>
+                <a href="#">Fashion</a>
+                <a href="#">Gastronomy</a>
+            </div>
+            <div class="footer-col">
+                <h4>Organizers</h4>
+                <a href="#">Create an Event</a>
+                <a href="#">Pricing</a>
+                <a href="#">Analytics</a>
+                <a href="#">NFT Ticketing</a>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <a href="#">About</a>
+                <a href="#">Careers</a>
+                <a href="#">Press</a>
+                <a href="#">Contact</a>
+                <a href="admin-dashboard.html" style="color: #4ade80; margin-top: 8px;">Admin Portal</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 Aura Events Ltd. All rights reserved.</p>
+            <p>Privacy Policy · Terms of Service · Cookie Settings</p>
+        </div>
+    </footer>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
+<!-- 1. npx prisma studio to see database[main]
+ 2. npm run dev at cd prisma-project
+ 3. npm run seed at cd prisma-project
+ 4. npm run build at cd prisma-project 
+ 5. npm run start at cd prisma-project  [Main]
+ 6. sqlite3 prisma/prisma/dev.db ".tables" "SELECT * FROM user;"  at cd prisma-project
+ 7. http://localhost:3000/api/raw-users to see raw sql data
+ 8. npx prisma db push to push data to server
+ 9. admin@aura.com,test@mail.in,host@mail.in,12345678
+ 10. npx prisma migrate deploy-->

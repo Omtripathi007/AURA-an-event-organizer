@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA — Host Your Event</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .host-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 140px 24px 80px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .host-card {
+            background: var(--deep);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            width: 100%;
+            max-width: 900px;
+            padding: 56px;
+            box-shadow: 0 30px 80px rgba(0, 118, 255, 0.1);
+            animation: fadeUp 0.8s ease-out;
+        }
+
+        .host-header {
+            margin-bottom: 48px;
+            text-align: left;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .host-card {
+                padding: 32px;
+            }
+        }
+
+        .form-section-title {
+            grid-column: 1 / -1;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--purple);
+            margin-top: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.01em;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-bottom: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            background: rgba(0, 118, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px 18px;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--purple);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(0, 118, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        .submit-area {
+            margin-top: 48px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            grid-column: 1 / -1;
+        }
+
+        .btn-host-submit {
+            padding: 16px 48px;
+            font-size: 0.9rem;
+        }
+
+        .back-gallery {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            transition: color 0.3s;
+            z-index: 10;
+        }
+
+        .back-gallery:hover {
+            color: var(--purple);
+        }
+
+        .image-upload-placeholder {
+            width: 100%;
+            height: 200px;
+            border: 2px dashed var(--glass-border);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: none;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .image-upload-placeholder:hover {
+            border-color: var(--purple);
+            background: rgba(0, 118, 255, 0.04);
+        }
+
+        .image-upload-placeholder svg {
+            color: var(--muted);
+            transition: color 0.3s;
+        }
+
+        .image-upload-placeholder:hover svg {
+            color: var(--purple);
+            transform: scale(1.1);
+        }
+
+        .success-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(240, 244, 248, 0.95);
+            backdrop-filter: blur(20px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            text-align: center;
+        }
+
+        .success-content {
+            max-width: 400px;
+            padding: 40px;
+            animation: fadeUp 0.6s ease-out;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 24px;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Custom Cursor -->
+    <div id="cursor"></div>
+    <div id="cursor-ring"></div>
+
+    <!-- BG Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <a href="index.html" class="back-gallery">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Return to Gallery
+    </a>
+
+    <div class="host-container">
+        <div class="host-card">
+            <div class="host-header">
+                <p class="section-label">✦ Partner Portal</p>
+                <h1 class="section-title">Launch Your <em>Elite</em> Experience</h1>
+                <p class="hero-sub" style="text-align: left; margin-left: 0; margin-top: 12px; font-size: 0.9rem;">
+                    Provide the details for your upcoming event. Our curation team will review yours submission within
+                    24 hours.</p>
+            </div>
+
+            <form id="host-event-form" class="form-grid">
+                <!-- SECTION 1: IDENTITY -->
+                <h3 class="form-section-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7" />
+                    </svg>
+                    Event Identity
+                </h3>
+
+                <div class="form-group full-width">
+                    <label class="form-label">Event Title</label>
+                    <input type="text" id="event-title" class="form-input" placeholder="e.g. Celestial: Laser Symphony"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select id="event-category" class="form-select" required>
+                        <option value="" disabled selected>Select category</option>
+                        <option value="Music">Music & Concerts</option>
+                        <option value="Technology">Technology Summit</option>
+                        <option value="Art">Art Exhibition</option>
+                        <option value="Fashion">Fashion Show</option>
+                        <option value="Gastronomy">Gastronomy</option>
+                        <option value="Sports">Sports & Wellness</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Short Tagline</label>
+                    <input type="text" id="event-tagline" class="form-input"
+                        placeholder="e.g. A once-in-a-generation auditory journey">
+                </div>
+
+                <!-- SECTION 2: LOGISTICS -->
+                <h3 class="form-section-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v6l4 2" />
+                    </svg>
+                    Time & Location
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" id="event-date" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Time</label>
+                    <input type="time" id="event-time" class="form-input" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="form-label">Venue Name / Address</label>
+                    <input type="text" id="event-location" class="form-input"
+                        placeholder="e.g. Metropolitan Loft, 5th Avenue, NY" required>
+                </div>
+
+                <!-- SECTION 3: ACCESS -->
+                <h3 class="form-section-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3" />
+                    </svg>
+                    Ticketing & Admission
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label">Base Ticket Price ($)</label>
+                    <input type="number" id="event-price" class="form-input" placeholder="0.00" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Total Capacity</label>
+                    <input type="number" id="event-capacity" class="form-input" placeholder="e.g. 500" min="1" required>
+                </div>
+
+                <!-- SECTION 4: DEPTH -->
+                <h3 class="form-section-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    Visuals & Narrative
+                </h3>
+
+                <div class="form-group full-width">
+                    <label class="form-label">Hero Image</label>
+                    <div class="image-upload-placeholder" id="image-upload-area" onclick="document.getElementById('event-image-input').click()" style="cursor: pointer; position: relative; overflow: hidden; background-size: cover; background-position: center;">
+                        <input type="file" id="event-image-input" accept="image/*" style="display: none;">
+                        <div id="upload-content" style="pointer-events: none; display: flex; flex-direction: column; align-items: center;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                            </svg>
+                            <span id="upload-text" style="font-size: 0.8rem; color: var(--muted); margin-top: 8px;">Click to Upload Banner</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="form-label">Full Event Description</label>
+                    <textarea id="event-description" class="form-textarea"
+                        placeholder="Describe the atmosphere, guest list, and what makes this event unique..."
+                        required></textarea>
+                </div>
+
+                <div class="submit-area">
+                    <button type="button" class="btn-ghost" onclick="window.location.href='index.html'">Discard</button>
+                    <button type="submit" id="host-submit-btn" class="btn-primary btn-host-submit">Submit for
+                        Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="success-overlay" class="success-overlay">
+        <div class="success-content">
+            <span class="success-icon">✨</span>
+            <h2 class="type-indicator" style="font-size: 2.22rem;">Submission <span>Received</span></h2>
+            <p class="hero-sub" style="margin-bottom: 32px;">Your event is now in the curation queue. Check your email
+                for updates.</p>
+            <button class="btn-primary" onclick="window.location.href='host-dashboard.html'">Go to Dashboard</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let uploadedImageBase64 = 'https://images.unsplash.com/photo-1540039155732-68ee23e15b51?auto=format&fit=crop&q=80&w=2000';
+
+        const imageInput = document.getElementById('event-image-input');
+        if (imageInput) {
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    uploadedImageBase64 = event.target.result;
+                    document.getElementById('image-upload-area').style.backgroundImage = `linear-gradient(rgba(13, 17, 23, 0.4), rgba(13, 17, 23, 0.4)), url(${uploadedImageBase64})`;
+                    document.getElementById('upload-text').innerText = 'Image Selected Successfully';
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        const hostForm = document.getElementById('host-event-form');
+        if (hostForm) {
+            hostForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('host-submit-btn');
+                const token = localStorage.getItem('token');
+
+                if (!token) {
+                    alert('Please login as a host.');
+                    return;
+                }
+
+                btn.innerText = "Processing...";
+                btn.disabled = true;
+
+                const payload = {
+                    title: document.getElementById('event-title').value,
+                    description: document.getElementById('event-description').value,
+                    date: new Date(document.getElementById('event-date').value + 'T' + document.getElementById('event-time').value).toISOString(),
+                    location: document.getElementById('event-location').value,
+                    price: parseFloat(document.getElementById('event-price').value),
+                    categoryNames: [document.getElementById('event-category').value],
+                    image: uploadedImageBase64
+                };
+
+                try {
+                    const response = await fetch('http://localhost:3000/api/events', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error('Failed to create event');
+
+                    document.getElementById('success-overlay').style.display = 'flex';
+                    document.querySelector('.host-card').style.opacity = '0';
+                    document.querySelector('.host-card').style.pointerEvents = 'none';
+
+                } catch (error) {
+                    alert(error.message);
+                    btn.innerText = "Submit for Review";
+                    btn.disabled = false;
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

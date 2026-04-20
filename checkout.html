@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA — Secure Checkout</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .checkout-container {
+            max-width: 900px;
+            margin: 140px auto 100px;
+            padding: 0 24px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 40px;
+        }
+
+        .checkout-card {
+            background: var(--deep);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 40px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 15px 50px rgba(0, 118, 255, 0.05);
+        }
+
+        .step-indicator {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .step-dot {
+            height: 4px;
+            flex: 1;
+            background: rgba(0, 118, 255, 0.05);
+            border-radius: 2px;
+            transition: all 0.4s;
+        }
+
+        .step-dot.active {
+            background: var(--purple);
+            box-shadow: 0 0 10px rgba(0, 118, 255, 0.3);
+        }
+
+        .booking-form {
+            display: none;
+        }
+
+        .booking-form.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .ticket-counter {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 30px 0;
+            background: rgba(0, 118, 255, 0.03);
+            width: fit-content;
+            padding: 12px 24px;
+            border-radius: 100px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .counter-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--purple);
+            background: #fff;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: none;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .counter-btn:hover {
+            background: var(--purple);
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .summary-total {
+            border-top: 1px solid var(--glass-border);
+            padding-top: 16px;
+            margin-top: 16px;
+            font-size: 1.45rem;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+        }
+
+        /* Success State */
+        .success-overlay {
+            text-align: center;
+            padding: 60px 0;
+        }
+
+        .ticket-code-grid {
+            display: grid;
+            gap: 16px;
+            margin-top: 40px;
+        }
+
+        .ticket-code-card {
+            background: rgba(0, 118, 255, 0.05);
+            border: 1px dashed var(--purple);
+            padding: 24px;
+            border-radius: 16px;
+            font-family: monospace;
+            letter-spacing: 0.2em;
+            font-size: 1.2rem;
+            color: var(--purple);
+            position: relative;
+        }
+
+        .ticket-code-card::before,
+        .ticket-code-card::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--black);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .ticket-code-card::before {
+            left: -10px;
+        }
+
+        .ticket-code-card::after {
+            right: -10px;
+        }
+
+        /* ─── FORM REFINEMENTS ─── */
+        .form-group {
+            margin-bottom: 28px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+        }
+
+        .auth-input {
+            width: 100%;
+            background: rgba(0, 118, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px 20px;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            box-shadow: inset 0 2px 4px rgba(0, 118, 255, 0.02);
+        }
+
+        .auth-input:focus {
+            outline: none;
+            border-color: var(--purple);
+            background: #fff;
+            box-shadow: 0 0 15px rgba(0, 118, 255, 0.1);
+        }
+
+        .auth-input::placeholder {
+            color: rgba(0, 118, 255, 0.25);
+        }
+
+        .form-section-title {
+            margin-bottom: 32px;
+        }
+
+        .btn-primary {
+            margin-top: 12px;
+        }
+
+        /* ─── SUCCESS ANIMATIONS ─── */
+        .success-animation {
+            margin: 0 auto 40px;
+            width: 80px;
+            height: 80px;
+        }
+
+        .checkmark-circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: var(--purple);
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 2;
+            stroke: #fff;
+            stroke-miterlimit: 10;
+            box-shadow: inset 0px 0px 0px var(--purple);
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+
+        .checkmark-check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+
+        @keyframes stroke {
+            100% { stroke-dashoffset: 0; }
+        }
+
+        @keyframes scale {
+            0%, 100% { transform: none; }
+            50% { transform: scale3d(1.1, 1.1, 1); }
+        }
+
+        @keyframes fill {
+            100% { box-shadow: inset 0px 0px 0px 40px var(--purple); }
+        }
+
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--purple);
+            top: -20px;
+            opacity: 0;
+            animation: confetti-fall 3s ease-out infinite;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        .confirmation-card {
+            background: var(--deep);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 60px 40px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 30px 60px rgba(0, 118, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="cursor"></div>
+    <div id="cursor-ring"></div>
+    <canvas id="bg-canvas"></canvas>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <nav id="mainNav">
+        <div class="nav-logo" onclick="window.location.href='index.html'">AURA</div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="index.html#events">Events</a>
+            <a href="explore-events.html">Explore</a>
+            <a href="index.html" class="nav-btn"
+                style="background:transparent; border:1px solid var(--glass-border);">Logout</a>
+        </div>
+    </nav>
+
+    <div class="checkout-container">
+        <div class="checkout-grid" id="checkout-main">
+            <div class="checkout-left">
+                <div class="checkout-card">
+                    <div class="step-indicator">
+                        <div class="step-dot active" id="dot-1"></div>
+                        <div class="step-dot" id="dot-2"></div>
+                        <div class="step-dot" id="dot-3"></div>
+                    </div>
+
+                    <!-- STEP 1: PERSONAL DETAILS -->
+                    <div class="booking-form active" id="step-1">
+                        <h2 class="form-section-title">Personal Details</h2>
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" class="auth-input" placeholder="Alexander Laurent">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" class="auth-input" placeholder="alex@aura.com">
+                        </div>
+                        <button type="button" class="btn-primary" style="width: 100%; margin-top: 20px;"
+                            onclick="nextStep(2)">Continue to Tickets</button>
+                    </div>
+
+                    <!-- STEP 2: TICKET SELECTION -->
+                    <div class="booking-form" id="step-2">
+                        <h2 class="form-section-title">Select Quantity</h2>
+                        <p style="color: var(--muted); font-size: 0.9rem;">How many spaces would you like to reserve?
+                        </p>
+
+                        <div class="ticket-counter">
+                            <button class="counter-btn" onclick="updateQty(-1)">-</button>
+                            <span id="qty-display"
+                                style="font-size: 1.5rem; font-weight: 600; min-width: 40px; text-align: center;">1</span>
+                            <button class="counter-btn" onclick="updateQty(1)">+</button>
+                        </div>
+
+                        <div id="guest-details-area" style="margin-bottom: 30px;"></div>
+
+                        <button type="button" class="btn-primary" style="width: 100%; margin-top: 20px;" onclick="nextStep(3)">Secure
+                            Booking</button>
+                        <button type="button" class="btn-ghost" style="width: 100%; margin-top: 10px;" onclick="nextStep(1)">Go
+                            Back</button>
+                    </div>
+
+                    <!-- STEP 3: PAYMENT SIMULATION -->
+                    <div class="booking-form" id="step-3">
+                        <h2 class="form-section-title">Secure Payment</h2>
+                        <div class="form-group">
+                            <label>Card Number</label>
+                            <input type="text" class="auth-input" placeholder="•••• •••• •••• ••••">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="form-group">
+                                <label>Expiry</label>
+                                <input type="text" class="auth-input" placeholder="MM/YY">
+                            </div>
+                            <div class="form-group">
+                                <label>CVC</label>
+                                <input type="text" class="auth-input" placeholder="•••">
+                            </div>
+                        </div>
+                        <button type="button" class="btn-primary"
+                            style="width: 100%; margin-top: 20px; background: var(--purple); color: #fff;" id="pay-btn"
+                            onclick="handlePayment()">Pay & Confirm</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="checkout-right">
+                <div class="checkout-card" style="padding: 30px;">
+                    <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; margin-bottom: 20px;">Order
+                        Summary</h3>
+                    <div id="event-summary-info">
+                        <p style="color: var(--purple-light); font-weight: 500;" id="summary-name">Loading Event...</p>
+                        <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 24px;" id="summary-location">
+                            World-wide Experience</p>
+                    </div>
+
+                    <div class="summary-item">
+                        <span>Base Price</span>
+                        <span id="summary-price">$0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Quantity</span>
+                        <span id="summary-qty">x1</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Service Fee</span>
+                        <span>$5.00</span>
+                    </div>
+
+                    <div class="summary-total">
+                        <span>Total Amount</span>
+                        <span style="float: right;" id="summary-total">$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUCCESS STATE -->
+        <div id="success-view" style="display: none; position: relative; z-index: 10;">
+            <div class="confetti-container" id="confetti-holder"></div>
+            <div class="confirmation-card reveal visible">
+                <div class="success-animation">
+                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
+                        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+                    </svg>
+                </div>
+
+                <h1 class="section-title">Booking <em>Confirmed</em></h1>
+                <p style="color: var(--muted); max-width: 500px; margin: 0 auto 40px;">Your experience is secured. We've
+                    sent your receipt to your email. Below is your unique digital pass.</p>
+
+                <div class="ticket-code-grid" id="ticket-codes" style="max-width: 400px; margin: 0 auto;">
+                    <!-- Codes go here -->
+                </div>
+
+                <div style="margin-top: 48px;">
+                    <button type="button" class="btn-primary" style="padding: 14px 40px;"
+                        onclick="window.location.href='user-dashboard.html'">View My Dashboard</button>
+                    <p style="margin-top: 20px; font-size: 0.8rem; color: var(--muted);">Redirecting to dashboard in <span
+                            id="timer-sec">10</span>s...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let currentStep = 1;
+        let quantity = 1;
+        let basePrice = 0;
+        let eventName = "";
+        let eventId = null;
+
+        // Parse URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        eventId = urlParams.get('eventId');
+        eventName = urlParams.get('title') || urlParams.get('event') || "Premium Experience";
+        basePrice = parseFloat(urlParams.get('price')) || 100;
+
+        document.getElementById('summary-name').innerText = eventName;
+        document.getElementById('summary-price').innerText = `$${basePrice}`;
+        updateSummary();
+
+        // Pre-fill user data if available
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user) {
+            document.querySelector('#step-1 input[type="text"]').value = user.name || '';
+            document.querySelector('#step-1 input[type="email"]').value = user.email || '';
+        }
+
+        function updateQty(delta) {
+            quantity = Math.max(1, quantity + delta);
+            document.getElementById('qty-display').innerText = quantity;
+            document.getElementById('summary-qty').innerText = `x${quantity}`;
+            
+            // Handle Guest Details Fields
+            const guestArea = document.getElementById('guest-details-area');
+            guestArea.innerHTML = '';
+            
+            if (quantity > 1) {
+                const title = document.createElement('h4');
+                title.innerText = "Additional Member Details";
+                title.style.margin = "24px 0 16px";
+                title.style.fontSize = "0.9rem";
+                title.style.color = "var(--purple)";
+                guestArea.appendChild(title);
+
+                for (let i = 2; i <= quantity; i++) {
+                    const group = document.createElement('div');
+                    group.className = "guest-input-group";
+                    group.style.marginBottom = "24px";
+                    group.style.padding = "20px";
+                    group.style.background = "rgba(0, 118, 255, 0.02)";
+                    group.style.borderRadius = "16px";
+                    group.style.border = "1px solid var(--glass-border)";
+                    
+                    group.innerHTML = `
+                        <p style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px; text-transform: uppercase;">Member ${i}</p>
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="font-size: 0.7rem;">Full Name</label>
+                            <input type="text" class="auth-input guest-name" placeholder="Member Name">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-size: 0.7rem;">Email (Optional)</label>
+                            <input type="email" class="auth-input guest-email" placeholder="member@email.com">
+                        </div>
+                    `;
+                    guestArea.appendChild(group);
+                }
+            }
+            
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const total = (basePrice * quantity) + 5;
+            document.getElementById('summary-total').innerText = `$${total.toLocaleString()}`;
+        }
+
+        function nextStep(step) {
+            // Validation for Step 1 -> 2
+            if (currentStep === 1 && step === 2) {
+                const name = document.querySelector('#step-1 input[type="text"]').value.trim();
+                const email = document.querySelector('#step-1 input[type="email"]').value.trim();
+                if (!name || !email) {
+                    alert("Please provide your name and email.");
+                    return;
+                }
+            }
+
+            // Validation for Step 2 -> 3
+            if (currentStep === 2 && step === 3) {
+                let allFilled = true;
+                document.querySelectorAll('.guest-name').forEach((input, index) => {
+                    if (!input.value.trim()) {
+                        alert(`Please provide the name for Member ${index + 2}`);
+                        allFilled = false;
+                    }
+                });
+                if (!allFilled) return;
+            }
+
+            document.querySelectorAll('.booking-form').forEach(f => f.classList.remove('active'));
+            document.querySelectorAll('.step-dot').forEach((d, i) => {
+                if (i < step) d.classList.add('active');
+                else d.classList.remove('active');
+            });
+            document.getElementById(`step-${step}`).classList.add('active');
+            currentStep = step;
+        }
+
+        async function handlePayment() {
+            const btn = document.getElementById('pay-btn');
+            const token = (localStorage.getItem('token') || "").trim();
+
+            if (!token) {
+                alert('Session expired. Please login again.');
+                window.location.href = 'login-signup.html';
+                return;
+            }
+
+            if (!eventId || isNaN(parseInt(eventId, 10))) {
+                alert('Invalid event selection. Please go back to events list.');
+                return;
+            }
+
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
+            const amount = (basePrice * quantity) + 5;
+
+            // Collect guest data
+            const attendees = [];
+            document.querySelectorAll('.guest-input-group').forEach(group => {
+                attendees.push({
+                    name: group.querySelector('.guest-name').value,
+                    email: group.querySelector('.guest-email').value || null
+                });
+            });
+
+            try {
+                const response = await fetch('http://localhost:3000/api/bookings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        eventId: parseInt(eventId, 10),
+                        amount: amount,
+                        attendees: attendees
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.error || 'Payment failed');
+
+                // STOP LOADING
+                document.getElementById('checkout-main').style.display = 'none';
+                document.getElementById('success-view').style.display = 'block';
+
+                const grid = document.getElementById('ticket-codes');
+                grid.innerHTML = ''; 
+                const card = document.createElement('div');
+                card.className = 'ticket-code-card';
+                card.innerText = data.ticketCode;
+                grid.appendChild(card);
+
+                // CELEBRATION
+                triggerConfetti();
+
+                // AUTO REDIRECT
+                let seconds = 10;
+                const timerEl = document.getElementById('timer-sec');
+                const interval = setInterval(() => {
+                    seconds--;
+                    if (timerEl) timerEl.innerText = seconds;
+                    if (seconds <= 0) {
+                        clearInterval(interval);
+                        window.location.href = 'user-dashboard.html';
+                    }
+                }, 1000);
+
+            } catch (error) {
+                alert(error.message);
+                btn.innerText = "Pay & Confirm";
+                btn.disabled = false;
+            }
+        }
+
+        function triggerConfetti() {
+            const holder = document.getElementById('confetti-holder');
+            const colors = ['#0076ff', '#00d2ff', '#7c3aed', '#ffbe0b'];
+            
+            for (let i = 0; i < 50; i++) {
+                const p = document.createElement('div');
+                p.className = 'confetti-piece';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.background = colors[Math.floor(Math.random() * colors.length)];
+                p.style.animationDelay = (Math.random() * 2) + 's';
+                p.style.width = (Math.random() * 10 + 5) + 'px';
+                p.style.height = (Math.random() * 5 + 5) + 'px';
+                holder.appendChild(p);
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA — Explore Global Events</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .explore-hero {
+            padding: 160px 24px 60px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .search-container {
+            max-width: 800px;
+            margin: 40px auto;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            padding: 20px 32px 20px 64px;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            transition: all 0.4s;
+            box-shadow: 0 10px 30px rgba(0, 118, 255, 0.05);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--purple);
+            background: #fff;
+            box-shadow: 0 15px 50px rgba(0, 118, 255, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        .filter-bar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .filter-chip {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--glass-border);
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            cursor: none;
+            transition: all 0.3s;
+        }
+
+        .filter-chip:hover,
+        .filter-chip.active {
+            background: var(--purple);
+            color: #fff;
+            border-color: var(--purple);
+            box-shadow: 0 5px 15px rgba(0, 118, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .explore-grid {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 24px 100px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 32px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ─── OVERRIDE TAGS FOR SEARCH ─── */
+        .card-location {
+            font-size: 0.65rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Custom Cursor -->
+    <div id="cursor"></div>
+    <div id="cursor-ring"></div>
+
+    <!-- BG Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <!-- NAV -->
+    <nav id="mainNav">
+        <div class="nav-logo" onclick="window.location.href='index.html'">AURA</div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="index.html#events">Events</a>
+            <a href="explore-events.html">Explore</a>
+            <a href="user-dashboard.html">My Tickets</a>
+            <a href="login-signup.html" class="nav-btn">Register Now</a>
+        </div>
+    </nav>
+
+    <main class="wrapper">
+        <section class="explore-hero">
+            <p class="section-label">✦ Global Selection</p>
+            <h1 class="section-title">Explore <em>World-Class</em> Events</h1>
+            <div class="search-container">
+                <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input type="text" class="search-input" placeholder="Search by name, artist, city or category...">
+            </div>
+
+            <div class="filter-bar">
+                <div class="filter-chip active">All Genres</div>
+                <div class="filter-chip">Music</div>
+                <div class="filter-chip">Technology</div>
+                <div class="filter-chip">Art & Design</div>
+                <div class="filter-chip">Gastronomy</div>
+                <div class="filter-chip">Fashion</div>
+                <div class="filter-chip">Sports</div>
+                <div class="filter-chip">Business</div>
+            </div>
+        </section>
+
+        <section class="explore-grid" id="events-loader">
+            <p style="text-align:center; grid-column: 1/-1;">Invoking the AURA gallery...</p>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        // Initial load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadEvents('events-loader');
+        });
+
+        // Dynamic filter logic
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+
+                const category = chip.innerText === 'All Genres' ? '' : chip.innerText;
+                loadEvents('events-loader', category);
+            });
+        });
+    </script>
+</body>
+
+</html>

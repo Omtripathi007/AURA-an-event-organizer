@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA — Hoster Dashboard</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --sidebar-width: 260px;
+        }
+
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ─── SIDEBAR ─── */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(255, 255, 255, 0.95);
+            /* Slightly less translucent */
+            backdrop-filter: blur(40px);
+            border-right: 1px solid var(--glass-border);
+            padding: 40px 24px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 1001;
+            /* Above orbs */
+            top: 0;
+            left: 0;
+            transform: none !important;
+            /* Reset global nav centering */
+        }
+
+        .sidebar-logo {
+            margin-bottom: 48px;
+            padding-left: 12px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: static !important;
+            width: 100% !important;
+            background: transparent !important;
+            border: none !important;
+            backdrop-filter: none !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            color: var(--muted);
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            transition: all 0.3s;
+            margin-bottom: 8px;
+            cursor: none;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(0, 118, 255, 0.08);
+            color: var(--purple);
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            opacity: 0.7;
+        }
+
+        .nav-item.active svg {
+            color: var(--purple-light);
+            opacity: 1;
+        }
+
+        /* ─── MAIN CONTENT ─── */
+        .main-dash {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 40px 56px;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 80px;
+                padding: 40px 10px;
+                align-items: center;
+            }
+
+            .sidebar-logo {
+                display: none;
+            }
+
+            .nav-item span {
+                display: none;
+            }
+
+            .main-dash {
+                margin-left: 80px;
+                padding: 40px 24px;
+            }
+        }
+
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .dash-title h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.22rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .dash-title span {
+            color: var(--purple);
+        }
+
+        /* ─── STAT CARDS ─── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .stat-card {
+            background: var(--deep);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 8px 30px rgba(0, 118, 255, 0.05);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 118, 255, 0.3);
+            box-shadow: 0 15px 45px rgba(0, 118, 255, 0.1);
+        }
+
+        .stat-card-label {
+            font-size: 0.65rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .stat-card-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--purple), var(--purple-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ─── EVENT LIST ─── */
+        .dash-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .events-table-wrap {
+            background: var(--card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(16px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            padding: 20px 24px;
+            font-size: 0.72rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(0, 118, 255, 0.02);
+        }
+
+        td {
+            padding: 24px;
+            border-bottom: 1px solid var(--glass-border);
+            font-size: 0.88rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(124, 58, 237, 0.03);
+        }
+
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: rgba(34, 197, 94, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .status-soldout {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .action-btn {
+            background: rgba(0, 118, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--purple);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            cursor: none;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            background: var(--purple);
+            color: #fff;
+            border-color: var(--purple);
+            box-shadow: 0 4px 12px rgba(0, 118, 255, 0.2);
+        }
+
+        /* ─── MANAGE VIEW ─── */
+        #manage-view {
+            display: none;
+            animation: fadeUp 0.6s ease-out;
+        }
+
+        .manage-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 32px;
+        }
+
+        @media (max-width: 1200px) {
+            .manage-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ─── ATTENDEE LIST ─── */
+        .attendee-list {
+            background: var(--card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 32px;
+        }
+
+        .attendee-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .attendee-item:last-child {
+            border-bottom: none;
+        }
+
+        .attendee-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .attendee-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--purple), var(--purple-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .attendee-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: block;
+        }
+
+        .attendee-email {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .manage-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-refund {
+            color: #f87171;
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.1);
+        }
+
+        .btn-refund:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Custom Cursor -->
+    <div id="cursor"></div>
+    <div id="cursor-ring"></div>
+
+    <!-- BG Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <nav id="mainNav" class="mobile-only-nav" style="display: none; height: 70px; padding: 0 24px;">
+        <div class="nav-logo" onclick="window.location.href='index.html'">AURA</div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </nav>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="nav-logo">AURA</div>
+            </div>
+            <div class="sidebar-nav">
+                <a href="#" class="nav-item active" onclick="showSection('overview')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                    </svg>
+                    <span>Overview</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('events')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    <span>My Events</span>
+                </a>
+                <a href="#" class="nav-item" onclick="alert('Please select an event from the Overview or My Events tab and click \'Manage\' to view its specific attendees.')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    <span>Attendees</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="1" x2="12" y2="23" />
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                    <span>Financials</span>
+                </a>
+            </div>
+            <div class="sidebar-footer">
+                <a href="index.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    <span>Exit Portal</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-dash">
+            <!-- SECTION: OVERVIEW -->
+            <div id="overview-section">
+                <header class="dash-header">
+                    <div class="dash-title">
+                        <p class="section-label">✦ Welcome Back, Creator</p>
+                        <h1>Your <span>Performance</span> Dashboard</h1>
+                    </div>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-card-label">Total Revenue</span>
+                        <div class="stat-card-value">$42,850</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card-label">Tickets Sold</span>
+                        <div class="stat-card-value">1,240</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card-label">Active Events</span>
+                        <div class="stat-card-value">3</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card-label">Avg. Rating</span>
+                    </div>
+                </div>
+
+                <div class="dash-section-header">
+                    <h2 class="form-section-title">Running Experiences</h2>
+                    <a href="host-event.html" class="action-btn"
+                        style="background:var(--purple); color:#fff; border:none; padding:10px 24px;">+ Host New
+                        Event</a>
+                </div>
+
+                <div class="events-table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Event Details</th>
+                                <th>Date</th>
+                                <th>Revenue</th>
+                                <th>Bookings</th>
+                                <th>Status</th>
+                                <th>Management</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: var(--muted);">Loading your events...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SECTION: MANAGE EVENT (DETAIL) -->
+            <div id="manage-view">
+                <header class="dash-header">
+                    <div class="dash-title">
+                        <p class="section-label" id="manage-event-label">✦ Managing Event</p>
+                        <h1 id="manage-event-title">Event <span>Management</span></h1>
+                    </div>
+                    <button class="btn-ghost" onclick="showSection('overview')">← Back to Overview</button>
+                </header>
+
+                <div class="manage-grid">
+                    <div class="manage-left">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 12px; margin-bottom: 20px;">
+                            <h3 style="margin: 0; font-family: 'Cormorant Garamond', serif; font-size: 1.4rem;">
+                                Registered Guest List</h3>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="action-btn" onclick="downloadAttendeeCSV()"
+                                    style="font-size: 0.7rem;">Download CSV</button>
+                                <button class="action-btn" onclick="openContactModal()"
+                                    style="font-size: 0.7rem;">Contact All Visitors</button>
+                            </div>
+                        </div>
+                        <div class="attendee-list" id="attendee-list">
+                            <!-- Loop items -->
+                            <div class="attendee-item">
+                                <div class="attendee-info">
+                                    <div class="attendee-avatar">AL</div>
+                                    <div>
+                                        <span class="attendee-name">Alexander Laurent</span>
+                                        <span class="attendee-email">alex@example.com</span>
+                                    </div>
+                                </div>
+                                <div class="manage-actions">
+                                    <button class="action-btn">Edit</button>
+                                    <button class="action-btn btn-refund" onclick="handleRefund(this)">Cancel &
+                                        Refund</button>
+                                </div>
+                            </div>
+                            <div class="attendee-item">
+                                <div class="attendee-info">
+                                    <div class="attendee-avatar">SM</div>
+                                    <div>
+                                        <span class="attendee-name">Sophia Miller</span>
+                                        <span class="attendee-email">sophia.m@domain.com</span>
+                                    </div>
+                                </div>
+                                <div class="manage-actions">
+                                    <button class="action-btn">Edit</button>
+                                    <button class="action-btn btn-refund" onclick="handleRefund(this)">Cancel &
+                                        Refund</button>
+                                </div>
+                            </div>
+                            <div class="attendee-item">
+                                <div class="attendee-info">
+                                    <div class="attendee-avatar">JW</div>
+                                    <div>
+                                        <span class="attendee-name">James Wilson</span>
+                                        <span class="attendee-email">jw@service.io</span>
+                                    </div>
+                                </div>
+                                <div class="manage-actions">
+                                    <button class="action-btn">Edit</button>
+                                    <button class="action-btn btn-refund" onclick="handleRefund(this)">Cancel &
+                                        Refund</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="manage-right">
+                        <h3 class="form-section-title">Real-time Insights</h3>
+                        <div class="stat-card" style="margin-bottom: 24px;">
+                            <span class="stat-card-label">Current Event Revenue</span>
+                            <div class="stat-card-value" id="current-event-revenue">$18,450</div>
+                            <p style="font-size: 0.72rem; color: #4ade80; margin-top: 10px;">↑ 12% since last week</p>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-card-label">Attendance Rate</span>
+                            <div class="stat-card-value">84%</div>
+                            <div
+                                style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-top: 16px; overflow: hidden;">
+                                <div style="width: 84%; height: 100%; background: var(--purple-light);"></div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card" style="margin-top: 24px;">
+                            <span class="stat-card-label">Registration Status</span>
+                            <div id="registration-status-display"
+                                style="font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; margin: 10px 0;">
+                                OPEN</div>
+                        </div>
+
+                        <div style="margin-top: 40px; display: grid; gap: 12px;">
+                            <button class="btn-primary" style="width: 100%;" onclick="openContactModal()">Contact All
+                                Guests</button>
+                            <button class="btn-ghost" style="width: 100%;" onclick="downloadAttendeeCSV()">Download Data
+                                (CSV)</button>
+                            <button id="toggle-reg-btn" class="btn-ghost" style="width: 100%; color: #f87171;"
+                                onclick="handleToggleRegistration()">Close Registrations</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Contact Modal -->
+            <div id="contact-modal" class="success-overlay">
+                <div class="auth-card" style="max-width: 540px;">
+                    <button class="btn-ghost"
+                        style="position: absolute; top: 20px; right: 20px; padding: 10px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; z-index: 10;"
+                        onclick="closeContactModal()">✕</button>
+
+                    <div class="auth-header" style="text-align: left; margin-bottom: 32px;">
+                        <h2 class="type-indicator" style="font-size: 2.22rem;">Message <span>Attendees</span></h2>
+                        <p class="section-label" style="font-size: 0.65rem; margin-top: 8px;">Blast an official update
+                            to everyone registered for this event</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Update Subject</label>
+                        <input type="text" id="contact-title" class="form-input"
+                            placeholder="e.g. Venue Change / Event Reminder">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Message Content</label>
+                        <textarea id="contact-message" class="form-textarea" style="min-height: 160px;"
+                            placeholder="Type your announcement here..."></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 16px; margin-top: 32px;">
+                        <button class="btn-ghost" style="flex: 1;" onclick="closeContactModal()">Discard</button>
+                        <button class="btn-primary" style="flex: 2;" onclick="sendBulkNotification()">Send
+                            Blast</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            loadHostDashboard();
+        });
+
+        function showSection(section) {
+            const overview = document.getElementById('overview-section');
+            const manage = document.getElementById('manage-view');
+            const navItems = document.querySelectorAll('.nav-item');
+
+            if (section === 'overview') {
+                overview.style.display = 'block';
+                manage.style.display = 'none';
+                navItems[0].classList.add('active');
+                navItems[1].classList.remove('active');
+            } else if (section === 'events') {
+                // For simplicity, overview and events list are same in this mockup
+                overview.style.display = 'block';
+                manage.style.display = 'none';
+                navItems[1].classList.add('active');
+                navItems[0].classList.remove('active');
+            }
+        }
+
+
+        function handleRefund(btn) {
+            if (confirm('Are you sure you want to cancel this registration and process a full refund?')) {
+                const item = btn.closest('.attendee-item');
+                item.style.opacity = '0.5';
+                item.style.pointerEvents = 'none';
+                btn.innerText = 'Refunded';
+            }
+        }
+    </script>
+</body>
+
+</html>

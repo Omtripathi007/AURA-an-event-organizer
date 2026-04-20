@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA — My Tickets</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .user-dash-container {
+            max-width: 1200px;
+            margin: 120px auto 100px;
+            padding: 0 24px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .dash-intro {
+            margin-bottom: 60px;
+        }
+
+        .ticket-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 32px;
+        }
+
+        .ticket-card {
+            background: var(--deep);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 118, 255, 0.05);
+        }
+
+        .ticket-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--purple);
+            box-shadow: 0 20px 50px rgba(0, 118, 255, 0.12);
+        }
+
+        .ticket-header {
+            padding: 24px;
+            background: rgba(0, 118, 255, 0.02);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ticket-status {
+            font-size: 0.65rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(34, 197, 94, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .ticket-body {
+            padding: 32px 24px;
+            flex: 1;
+        }
+
+        .ticket-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        .ticket-info-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .ticket-footer {
+            padding: 24px;
+            border-top: 1px dashed var(--glass-border);
+        }
+
+        /* ─── MODAL PASS ─── */
+        #pass-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(240, 244, 248, 0.85);
+            backdrop-filter: blur(16px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .pass-content {
+            background: var(--card);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            max-width: 500px;
+            width: 100%;
+            padding: 48px;
+            position: relative;
+            text-align: center;
+            animation: zoomIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        .pass-close {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            color: var(--muted);
+            cursor: none;
+            transition: 0.3s;
+        }
+
+        .pass-close:hover {
+            color: var(--purple);
+        }
+
+        .qr-placeholder {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 32px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-placeholder div {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #000;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="1" height="1" fill="black"/><rect x="2" width="1" height="1"/><rect x="4" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="5" y="1" width="1" height="1"/></svg>') center/contain;
+        }
+
+        .code-display {
+            font-family: monospace;
+            font-size: 1.4rem;
+            letter-spacing: 0.3em;
+            color: var(--purple);
+            background: rgba(0, 118, 255, 0.05);
+            padding: 16px;
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="cursor"></div>
+    <div id="cursor-ring"></div>
+    <canvas id="bg-canvas"></canvas>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <nav id="mainNav">
+        <div class="nav-logo" onclick="window.location.href='index.html'">AURA</div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="explore-events.html">Browse Events</a>
+            <a href="index.html" class="nav-btn"
+                style="background:transparent; border:1px solid var(--glass-border);">Logout</a>
+        </div>
+    </nav>
+
+    <div class="user-dash-container">
+        <header class="dash-intro">
+            <p class="section-label">✦ My Collection</p>
+            <h1 class="section-title">Your <em>Digital Passes</em></h1>
+            <p style="color: var(--muted); margin-top: 12px;">You have 2 upcoming experiences.</p>
+        </header>
+
+        <div class="ticket-grid" id="bookings-loader">
+            <p style="text-align:center; grid-column: 1/-1;">Opening your collection...</p>
+        </div>
+    </div>
+
+    <!-- Pass Modal -->
+    <div id="pass-modal">
+        <div class="pass-content">
+            <div class="pass-close" onclick="closePass()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </div>
+            <p class="section-label">Digital Pass</p>
+            <h2 id="modal-title"
+                style="font-family: 'Cormorant Garamond', serif; font-size: 2rem; margin-bottom: 32px;">Event Title</h2>
+
+            <div class="qr-placeholder">
+                <div></div>
+            </div>
+
+            <p style="font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em;">Unique
+                Ticket Code</p>
+            <div id="modal-code" class="code-display">AURA-0000-0000</div>
+
+            <p style="font-size: 0.8rem; color: var(--muted);">Please present this screen at the entrance for scanning.
+                This pass is non-transferable.</p>
+        </div>
+    </div>
+
+    <!-- Refund Modal -->
+    <div id="refund-modal"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(240, 244, 248, 0.85); backdrop-filter: blur(16px); z-index: 2100; display: none; align-items: center; justify-content: center; padding: 24px;">
+        <div class="pass-content" style="max-width: 450px;">
+            <p class="section-label">Cancellation</p>
+            <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 2rem; margin-bottom: 24px;">Refund Request</h2>
+            <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 24px;">Please let us know why you are
+                cancelling your ticket.</p>
+
+            <div class="form-group" style="text-align: left; margin-bottom: 24px;">
+                <label style="font-size: 0.75rem;">Reason for Refund</label>
+                <textarea id="refund-reason" class="auth-input"
+                    style="width: 100%; height: 100px; padding: 12px; border-radius: 12px; resize: none; font-family: inherit;"
+                    placeholder="e.g. Schedule conflict, Medical emergency..."></textarea>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+                <button type="button" class="btn-primary" id="confirm-refund-btn" style="flex: 2; border-radius: 12px; margin-top: 0;">Confirm Refund</button>
+                <button type="button" class="btn-ghost" onclick="closeRefundModal()"
+                    style="flex: 1; border-radius: 12px;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            loadUserBookings('bookings-loader');
+        });
+
+        function openPass(title, code) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-code').innerText = code;
+            document.getElementById('pass-modal').style.display = 'flex';
+        }
+
+        function closePass() {
+            document.getElementById('pass-modal').style.display = 'none';
+        }
+
+        // Close modal on click outside
+        window.onclick = function (event) {
+            const modal = document.getElementById('pass-modal');
+            if (event.target == modal) {
+                closePass();
+            }
+        }
+    </script>
+</body>
+
+</html>
