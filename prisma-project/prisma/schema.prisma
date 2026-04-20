@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  password      String
+  name          String
+  role          String         @default("CITIZEN") // CITIZEN, HOST, ADMIN
+  createdAt     DateTime       @default(now())
+  profile       Profile?
+  events        Event[]        @relation("HostEvents")
+  bookings      Booking[]
+  reviews       Review[]
+  notifications Notification[]
+}
+
+model Profile {
+  id       Int     @id @default(autoincrement())
+  bio      String?
+  phone    String?
+  avatar   String?
+  social   String? // JSON string or URL
+  user     User    @relation(fields: [userId], references: [id])
+  userId   Int     @unique
+}
+
+model Event {
+  id             Int        @id @default(autoincrement())
+  title          String
+  description    String
+  date           DateTime
+  location       String
+  price          Float      @default(0)
+  image          String?
+  approvalStatus String     @default("PENDING") // PENDING, APPROVED, REJECTED
+  host           User       @relation("HostEvents", fields: [hostId], references: [id])
+  hostId         Int
+  categories     Category[] @relation("EventCategories")
+  bookings       Booking[]
+  reviews        Review[]
+  createdAt      DateTime   @default(now())
+  status         String     @default("OPEN") // OPEN, CLOSED, DRAFT
+}
+
+model Category {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  events Event[] @relation("EventCategories")
+}
+
+model Booking {
+  id          Int      @id @default(autoincrement())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  event       Event    @relation(fields: [eventId], references: [id])
+  eventId     Int
+  ticketCode   String   @unique
+  attendees    Json?
+  refundReason String?
+  status       String   @default("CONFIRMED")
+  payment      Payment?
+  createdAt    DateTime @default(now())
+}
+
+model Payment {
+  id            Int      @id @default(autoincrement())
+  amount        Float
+  status        String   @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
+  transactionId String?  @unique
+  booking       Booking  @relation(fields: [bookingId], references: [id])
+  bookingId     Int      @unique
+  createdAt     DateTime @default(now())
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int      @default(5)
+  comment   String?
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   Int
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
+}
