@@ -475,7 +475,7 @@
             }
 
             try {
-                const res = await fetch('http://localhost:3000/api/admin/events/pending', {
+                const res = await fetch(`${API_BASE_URL}/api/admin/events/pending`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if(!res.ok) throw new Error('Unauthorised or session expired.');
@@ -551,7 +551,7 @@
             if(!confirm(`Are you sure you want to ${status.toLowerCase()} this event?`)) return;
             const token = localStorage.getItem('token');
             try {
-                const res = await fetch(`http://localhost:3000/api/admin/events/${id}/status`, {
+                const res = await fetch(`${API_BASE_URL}/api/admin/events/${id}/status`, {
                     method: 'PATCH',
                     headers: { 
                         'Content-Type': 'application/json',

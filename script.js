@@ -1,3 +1,7 @@
+window.API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? 'http://localhost:3000' 
+    : 'https://aura-an-event-organizer.onrender.com';
+
 // ─── SPLASH SCREEN ───
 window.addEventListener('load', () => {
     const splash = document.getElementById('splash-screen');
@@ -229,8 +233,8 @@ async function loadEvents(containerId, category = '') {
 
     try {
         const url = category
-            ? `http://localhost:3000/api/events?category=${encodeURIComponent(category)}`
-            : 'http://localhost:3000/api/events';
+            ? `${API_BASE_URL}/api/events?category=${encodeURIComponent(category)}`
+            : `${API_BASE_URL}/api/events`;
 
         const response = await fetch(url);
         const events = await response.json();
@@ -268,7 +272,7 @@ async function loadUserBookings(containerId) {
     if (!token) return;
 
     try {
-        const response = await fetch('http://localhost:3000/api/user/bookings', {
+        const response = await fetch(`${API_BASE_URL}/api/user/bookings`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const bookings = await response.json();
@@ -326,7 +330,7 @@ async function loadHostDashboard() {
     if (!eventsTableBody || !user || user.role !== 'HOST') return;
 
     try {
-        const response = await fetch(`http://localhost:3000/api/events?hostId=${user.id}`);
+        const response = await fetch(`${API_BASE_URL}/api/events?hostId=${user.id}`);
         const events = await response.json();
 
         // Update Stats
@@ -387,7 +391,7 @@ async function manageEvent(eventId, eventName) {
 
     try {
         const user = JSON.parse(localStorage.getItem('user'));
-        const response = await fetch(`http://localhost:3000/api/events?hostId=${user.id}`);
+        const response = await fetch(`${API_BASE_URL}/api/events?hostId=${user.id}`);
         const events = await response.json();
         const event = events.find(e => e.id == eventId);
 
@@ -454,7 +458,7 @@ async function handleRefund(bookingId, btn) {
 
     try {
         const id = parseInt(bookingId, 10);
-        const response = await fetch(`http://localhost:3000/api/bookings/${id}/refund`, {
+        const response = await fetch(`${API_BASE_URL}/api/bookings/${id}/refund`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -479,7 +483,7 @@ async function handleToggleRegistration() {
 
     try {
         const id = parseInt(currentEventData.id, 10);
-        const response = await fetch(`http://localhost:3000/api/events/${id}/status`, {
+        const response = await fetch(`${API_BASE_URL}/api/events/${id}/status`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -560,7 +564,7 @@ async function sendBulkNotification() {
     if (sendBtn) { sendBtn.innerText = 'Sending...'; sendBtn.disabled = true; }
 
     try {
-        const response = await fetch(`http://localhost:3000/api/notifications/bulk`, {
+        const response = await fetch(`${API_BASE_URL}/api/notifications/bulk`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -602,7 +606,7 @@ if (authForm) {
         submitBtn.disabled = true;
 
         try {
-            const response = await fetch(`http://localhost:3000${endpoint}`, {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -684,7 +688,7 @@ if (confirmRefundBtn) {
             const bookingId = parseInt(activeRefundBookingId, 10);
             if (isNaN(bookingId)) throw new Error('Invalid Booking ID format');
 
-            const response = await fetch(`http://localhost:3000/api/user/bookings/${bookingId}/refund`, {
+            const response = await fetch(`${API_BASE_URL}/api/user/bookings/${bookingId}/refund`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
