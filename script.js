@@ -2,18 +2,6 @@ window.API_BASE_URL = window.location.hostname === 'localhost' || window.locatio
     ? 'http://localhost:3000' 
     : 'https://aura-an-event-organizer.onrender.com';
 
-// ─── SPLASH SCREEN ───
-window.addEventListener('load', () => {
-    const splash = document.getElementById('splash-screen');
-    if (splash) {
-        setTimeout(() => {
-            splash.classList.add('fade-out');
-            setTimeout(() => {
-                splash.remove();
-            }, 1000); // Match CSS transition duration
-        }, 6600); // Show splash for 2.2s
-    }
-});
 
 // ─── CURSOR ───
 const cursor = document.getElementById('cursor');
