@@ -302,13 +302,41 @@
                 </h3>
 
                 <div class="form-group">
+                    <label class="form-label">Total Capacity</label>
+                    <input type="number" id="event-capacity" class="form-input" placeholder="e.g. 500" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Event Type</label>
+                    <div style="display: flex; gap: 20px; margin-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer;">
+                            <input type="radio" name="event-type" value="paid" checked onclick="togglePriceField(true)"> Paid
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer;">
+                            <input type="radio" name="event-type" value="free" onclick="togglePriceField(false)"> Free
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" id="price-group">
                     <label class="form-label">Base Registration Fee ($)</label>
                     <input type="number" id="event-price" class="form-input" placeholder="0.00" min="0" required>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Total Capacity</label>
-                    <input type="number" id="event-capacity" class="form-input" placeholder="e.g. 500" min="1" required>
+                <div class="form-group full-width">
+                    <label class="form-label">Registration Platform</label>
+                    <div style="display: flex; gap: 20px; margin-top: 10px; margin-bottom: 15px;">
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer;">
+                            <input type="radio" name="reg-type" value="INTERNAL" checked onclick="toggleExternalLink(false)"> Aura Platform
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer;">
+                            <input type="radio" name="reg-type" value="EXTERNAL" onclick="toggleExternalLink(true)"> External Platform
+                        </label>
+                    </div>
+                    <div id="external-link-group" style="display: none;">
+                        <label class="form-label" style="font-size: 0.65rem;">External Registration Link (Google Forms, Website, etc.)</label>
+                        <input type="url" id="external-link" class="form-input" placeholder="https://forms.gle/...">
+                    </div>
                 </div>
 
                 <!-- SECTION 4: DEPTH -->
@@ -341,6 +369,19 @@
                         required></textarea>
                 </div>
 
+                <div class="form-group full-width">
+                    <label class="form-label">Supplementary Document (Optional PDF/DOCX)</label>
+                    <div class="image-upload-placeholder" style="height: 100px; border-style: dotted;" onclick="document.getElementById('event-doc-input').click()">
+                        <input type="file" id="event-doc-input" accept=".pdf,.doc,.docx" style="display: none;">
+                        <div style="pointer-events: none; display: flex; align-items: center; gap: 12px;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            <span id="doc-upload-text" style="font-size: 0.8rem; color: var(--muted);">Click to upload supplementary guide</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="submit-area">
                     <button type="button" class="btn-ghost" onclick="window.location.href='index.html'">Discard</button>
                     <button type="submit" id="host-submit-btn" class="btn-primary btn-host-submit">Submit for
@@ -363,18 +404,48 @@
     <script src="script.js"></script>
     <script>
         let uploadedImageBase64 = 'https://images.unsplash.com/photo-1540039155732-68ee23e15b51?auto=format&fit=crop&q=80&w=2000';
+        let uploadedDocBase64 = null;
+
+        function togglePriceField(isPaid) {
+            const group = document.getElementById('price-group');
+            const input = document.getElementById('event-price');
+            group.style.display = isPaid ? 'block' : 'none';
+            input.required = isPaid;
+            if (!isPaid) input.value = '0';
+        }
+
+        function toggleExternalLink(isExternal) {
+            const group = document.getElementById('external-link-group');
+            const input = document.getElementById('external-link');
+            group.style.display = isExternal ? 'block' : 'none';
+            input.required = isExternal;
+        }
 
         const imageInput = document.getElementById('event-image-input');
         if (imageInput) {
             imageInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (!file) return;
-                
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     uploadedImageBase64 = event.target.result;
                     document.getElementById('image-upload-area').style.backgroundImage = `linear-gradient(rgba(13, 17, 23, 0.4), rgba(13, 17, 23, 0.4)), url(${uploadedImageBase64})`;
                     document.getElementById('upload-text').innerText = 'Image Selected Successfully';
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        const docInput = document.getElementById('event-doc-input');
+        if (docInput) {
+            docInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    uploadedDocBase64 = event.target.result;
+                    document.getElementById('doc-upload-text').innerText = file.name;
+                    document.getElementById('doc-upload-text').style.color = 'var(--purple)';
                 };
                 reader.readAsDataURL(file);
             });
@@ -395,12 +466,19 @@
                 btn.innerText = "Processing...";
                 btn.disabled = true;
 
+                const isFree = document.querySelector('input[name="event-type"]:checked').value === 'free';
+                const regType = document.querySelector('input[name="reg-type"]:checked').value;
+
                 const payload = {
                     title: document.getElementById('event-title').value,
                     description: document.getElementById('event-description').value,
                     date: new Date(document.getElementById('event-date').value + 'T' + document.getElementById('event-time').value).toISOString(),
                     location: document.getElementById('event-location').value,
-                    price: parseFloat(document.getElementById('event-price').value),
+                    price: isFree ? 0 : parseFloat(document.getElementById('event-price').value),
+                    isFree: isFree,
+                    regType: regType,
+                    externalLink: regType === 'EXTERNAL' ? document.getElementById('external-link').value : null,
+                    descriptionDoc: uploadedDocBase64,
                     categoryNames: [document.getElementById('event-category').value],
                     image: uploadedImageBase64
                 };

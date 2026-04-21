@@ -240,7 +240,7 @@ async function loadEvents(containerId, category = '') {
                     <p class="card-desc">${event.description}</p>
                     <div class="card-footer">
                         <span class="card-venue">${event.host.name}</span>
-                        <a href="checkout.html?eventId=${event.id}&price=${event.price}&title=${encodeURIComponent(event.title)}" class="card-btn" style="text-decoration:none;">Book Now</a>
+                        <a href="checkout.html?eventId=${event.id}&price=${event.price}&title=${encodeURIComponent(event.title)}&isFree=${event.isFree}&regType=${event.regType}&externalLink=${encodeURIComponent(event.externalLink || '')}" class="card-btn" style="text-decoration:none;">Book Now</a>
                     </div>
                 </div>
             </div>

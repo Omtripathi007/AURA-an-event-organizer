@@ -455,10 +455,13 @@
         const urlParams = new URLSearchParams(window.location.search);
         eventId = urlParams.get('eventId');
         eventName = urlParams.get('title') || urlParams.get('event') || "Premium Experience";
-        basePrice = parseFloat(urlParams.get('price')) || 100;
+        basePrice = parseFloat(urlParams.get('price')) || 0;
+        const isFree = urlParams.get('isFree') === 'true';
+        const regType = urlParams.get('regType') || 'INTERNAL';
+        const externalLink = urlParams.get('externalLink');
 
         document.getElementById('summary-name').innerText = eventName;
-        document.getElementById('summary-price').innerText = `$${basePrice}`;
+        document.getElementById('summary-price').innerText = isFree ? 'FREE' : `$${basePrice}`;
         updateSummary();
 
         // Pre-fill user data if available
@@ -466,6 +469,16 @@
         if (user) {
             document.querySelector('#step-1 input[type="text"]').value = user.name || '';
             document.querySelector('#step-1 input[type="email"]').value = user.email || '';
+        }
+
+        if (regType === 'EXTERNAL') {
+            document.querySelector('#step-1 button').innerText = "Continue to External Registration";
+            document.getElementById('summary-qty').parentElement.style.display = 'none';
+            document.getElementById('summary-price').parentElement.style.display = 'none';
+        }
+        if (isFree) {
+            document.querySelector('#step-2 button').innerText = "Register for Free";
+            document.querySelector('.summary-item:nth-child(3)').style.display = 'none'; // hide service fee
         }
 
         function updateQty(delta) {
@@ -513,22 +526,33 @@
         }
 
         function updateSummary() {
+            if (isFree) {
+                document.getElementById('summary-total').innerText = "FREE";
+                return;
+            }
             const total = (basePrice * quantity) + 5;
             document.getElementById('summary-total').innerText = `$${total.toLocaleString()}`;
         }
 
         function nextStep(step) {
-            // Validation for Step 1 -> 2
-            if (currentStep === 1 && step === 2) {
+            // Validation for Step 1
+            if (currentStep === 1) {
                 const name = document.querySelector('#step-1 input[type="text"]').value.trim();
                 const email = document.querySelector('#step-1 input[type="email"]').value.trim();
                 if (!name || !email) {
                     alert("Please provide your name and email.");
                     return;
                 }
+                if (regType === 'EXTERNAL') {
+                    // Lead capture simulated: redirect to external link
+                    window.open(externalLink, '_blank');
+                    alert("Redirecting to external registration platform. Safe travels!");
+                    window.location.href = 'index.html';
+                    return;
+                }
             }
 
-            // Validation for Step 2 -> 3
+            // Validation for Step 2 -> 3 (or handle free)
             if (currentStep === 2 && step === 3) {
                 let allFilled = true;
                 document.querySelectorAll('.guest-name').forEach((input, index) => {
@@ -538,6 +562,11 @@
                     }
                 });
                 if (!allFilled) return;
+
+                if (isFree) {
+                    handlePayment(); // Direct to booking for free events
+                    return;
+                }
             }
 
             document.querySelectorAll('.booking-form').forEach(f => f.classList.remove('active'));
@@ -567,7 +596,7 @@
             btn.innerText = "Processing...";
             btn.disabled = true;
 
-            const amount = (basePrice * quantity) + 5;
+            const amount = isFree ? 0 : (basePrice * quantity) + 5;
 
             // Collect guest data
             const attendees = [];
@@ -588,7 +617,8 @@
                     body: JSON.stringify({
                         eventId: parseInt(eventId, 10),
                         amount: amount,
-                        attendees: attendees
+                        attendees: attendees,
+                        isFree: isFree
                     })
                 });
 
