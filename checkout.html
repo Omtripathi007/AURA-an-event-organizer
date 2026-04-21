@@ -401,7 +401,7 @@
                         <span>Quantity</span>
                         <span id="summary-qty">x1</span>
                     </div>
-                    <div class="summary-item">
+                    <div class="summary-item" id="service-fee-item">
                         <span>Service Fee</span>
                         <span>$5.00</span>
                     </div>
@@ -478,7 +478,8 @@
         }
         if (isFree) {
             document.querySelector('#step-2 button').innerText = "Register for Free";
-            document.querySelector('.summary-item:nth-child(3)').style.display = 'none'; // hide service fee
+            const feeItem = document.getElementById('service-fee-item');
+            if (feeItem) feeItem.style.display = 'none';
         }
 
         function updateQty(delta) {
@@ -544,10 +545,15 @@
                     return;
                 }
                 if (regType === 'EXTERNAL') {
-                    // Lead capture simulated: redirect to external link
-                    window.open(externalLink, '_blank');
+                    if (!externalLink || externalLink === 'null' || externalLink === '') {
+                        alert("Error: No external registration link was provided for this event.");
+                        return;
+                    }
+                    // Ensure the link has a protocol
+                    const targetLink = externalLink.startsWith('http') ? externalLink : 'https://' + externalLink;
+                    
                     alert("Redirecting to external registration platform. Safe travels!");
-                    window.location.href = 'index.html';
+                    window.location.href = targetLink;
                     return;
                 }
             }
