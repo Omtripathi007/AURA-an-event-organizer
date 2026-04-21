@@ -46,6 +46,10 @@ model Event {
   categories     Category[] @relation("EventCategories")
   bookings       Booking[]
   reviews        Review[]
+  descriptionDoc String?
+  isFree         Boolean    @default(false)
+  regType        String     @default("INTERNAL") // INTERNAL, EXTERNAL
+  externalLink   String?
   createdAt      DateTime   @default(now())
   status         String     @default("OPEN") // OPEN, CLOSED, DRAFT
 }

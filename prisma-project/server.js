@@ -142,7 +142,10 @@ app.get('/api/events', async (req, res) => {
 
 app.post('/api/events', authenticateToken, async (req, res) => {
     if (req.user.role !== 'HOST') return res.status(403).json({ error: 'Host only' });
-    const { title, description, date, location, price, image, categoryNames } = req.body;
+    const { 
+        title, description, date, location, price, image, categoryNames,
+        descriptionDoc, isFree, regType, externalLink 
+    } = req.body;
     try {
         const event = await prisma.event.create({
             data: {
@@ -150,8 +153,12 @@ app.post('/api/events', authenticateToken, async (req, res) => {
                 description,
                 date: new Date(date),
                 location,
-                price: parseFloat(price),
+                price: isFree ? 0 : parseFloat(price),
                 image,
+                descriptionDoc,
+                isFree: !!isFree,
+                regType: regType || 'INTERNAL',
+                externalLink,
                 hostId: req.user.userId,
                 categories: {
                     connectOrCreate: categoryNames.map(name => ({
@@ -210,7 +217,7 @@ app.post('/api/bookings', authenticateToken, async (req, res) => {
                 ticketCode,
                 attendees: attendees || null,
                 status: 'CONFIRMED', 
-                payment: {
+                payment: event.isFree ? undefined : {
                     create: {
                         amount: parseFloat(amount),
                         status: 'COMPLETED', // Simulating instant payment
