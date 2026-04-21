@@ -265,6 +265,12 @@ async function loadUserBookings(containerId) {
         });
         const bookings = await response.json();
 
+        const activeBookings = bookings.filter(b => b.status !== 'REFUNDED' && (b.payment ? b.payment.status !== 'REFUNDED' : true));
+        const countText = document.getElementById('upcoming-count');
+        if (countText) {
+            countText.innerText = `You have ${activeBookings.length} upcoming experience${activeBookings.length !== 1 ? 's' : ''}.`;
+        }
+
         if (bookings.length === 0) {
             container.innerHTML = '<p style="color:var(--muted); text-align:center; grid-column: 1/-1;">You haven\'t booked any events yet.</p>';
             return;
@@ -417,7 +423,7 @@ async function manageEvent(eventId, eventName) {
                                 <div>
                                     <span class="attendee-name">${userName}</span>
                                     <span class="attendee-email">${userEmail}</span>
-                                    <span style="display:block; font-size:0.65rem; color:var(--muted); margin-top:2px;">Ticket: #${booking.ticketCode} &nbsp;·&nbsp; Paid: ${bookingAmount}</span>
+                                    <span style="display:block; font-size:0.65rem; color:var(--muted); margin-top:2px;">Registration: #${booking.ticketCode} &nbsp;·&nbsp; Paid: ${bookingAmount}</span>
                                     ${isRefunded ? `<span style="display:block; font-size:0.65rem; color:#ef4444; margin-top:4px;">Refunded: ${booking.refundReason || 'No reason provided'}</span>` : ''}
                                 </div>
                             </div>
@@ -495,7 +501,7 @@ function downloadAttendeeCSV() {
         return;
     }
 
-    const headers = ['Name', 'Email', 'Ticket Code', 'Payment Status', 'Amount', 'Booking Status'];
+    const headers = ['Name', 'Email', 'Registration Code', 'Payment Status', 'Amount', 'Booking Status'];
     const rows = currentEventData.bookings.map(b => [
         (b.user && b.user.name) ? b.user.name : 'Unknown',
         (b.user && b.user.email) ? b.user.email : 'Unknown',
@@ -690,7 +696,7 @@ if (confirmRefundBtn) {
                 throw new Error(data.error || 'Refund failed');
             }
 
-            alert('Your ticket has been refunded successfully.');
+            alert('Your registration has been refunded successfully.');
             closeRefundModal();
             loadUserBookings('bookings-loader');
         } catch (error) {

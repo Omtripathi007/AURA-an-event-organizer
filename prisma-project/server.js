@@ -225,7 +225,7 @@ app.post('/api/bookings', authenticateToken, async (req, res) => {
             data: {
                 userId: req.user.userId,
                 title: 'Booking Confirmed!',
-                message: `You have successfully booked "${ticketCode}"`
+                message: `You have successfully registered with ID "${ticketCode}"`
             }
         });
 
@@ -312,8 +312,8 @@ app.post('/api/user/bookings/:id/refund', authenticateToken, async (req, res) =>
             prisma.notification.create({
                 data: {
                     userId: req.user.userId,
-                    title: 'Ticket Refunded',
-                    message: `Your booking for "${booking.event.title}" has been refunded.`
+                    title: 'Registration Refunded',
+                    message: `Your registration for "${booking.event.title}" has been refunded.`
                 }
             })
         ]);

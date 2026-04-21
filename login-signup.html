@@ -176,7 +176,7 @@
                 <div class="nav-logo" style="margin-bottom: 24px; justify-content: center; display: flex;">AURA</div>
                 <div id="form-title" class="type-indicator">Welcome <span>User</span></div>
                 <p id="form-subtitle" class="section-label" style="font-size: 0.6rem; opacity: 0.7;">Access your premium
-                    tickets</p>
+                    registrations</p>
             </div>
 
             <div class="auth-tabs">
@@ -220,7 +220,7 @@
             if (mode === 'user') {
                 tabs[0].classList.add('active');
                 document.getElementById('form-title').innerHTML = isLogin ? 'Welcome <span>User</span>' : 'Join as <span>User</span>';
-                document.getElementById('form-subtitle').innerText = isLogin ? 'Access your premium tickets' : 'Start discovering extraordinary events';
+                document.getElementById('form-subtitle').innerText = isLogin ? 'Access your premium registrations' : 'Start discovering extraordinary events';
             } else {
                 tabs[1].classList.add('active');
                 document.getElementById('form-title').innerHTML = isLogin ? 'Welcome <span>Hoster</span>' : 'Join as <span>Hoster</span>';
