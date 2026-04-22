@@ -64,6 +64,11 @@
     height: 14px;
   }
 
+  @media (hover: none) and (pointer: coarse), (max-width: 1024px) {
+    #cursor, #cursor-ring {
+      display: none !important;
+    }
+  }
   /* ─── CANVAS BG ─── */
   #bg-canvas {
     position: fixed;
@@ -156,6 +161,13 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-logo span {
+    -webkit-text-fill-color: var(--muted);
+    color: var(--muted);
   }
 
   .nav-links {
