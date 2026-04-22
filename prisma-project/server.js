@@ -175,6 +175,18 @@ app.post('/api/events', authenticateToken, async (req, res) => {
     }
 });
 
+app.post('/api/events/:id/interested', async (req, res) => {
+    try {
+        const event = await prisma.event.update({
+            where: { id: parseInt(req.params.id) },
+            data: { interestedCount: { increment: 1 } }
+        });
+        res.json({ success: true, interestedCount: event.interestedCount });
+    } catch (error) {
+        res.status(400).json({ error: 'Failed to update interest' });
+    }
+});
+
 // --- Admin Routes ---
 app.get('/api/admin/events/pending', authenticateToken, async (req, res) => {
     if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Admin only' });

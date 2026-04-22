@@ -261,7 +261,7 @@ async function loadEvents(containerId, category = '') {
         const events = await response.json();
 
         container.innerHTML = events.map(event => {
-            const regCount = event.bookings ? event.bookings.length : 0;
+            const regCount = event.interestedCount || 0;
             const capacity = event.capacity || 100; // Fallback if capacity not set
             const isFillingFast = regCount > 0 && (regCount / capacity) >= 0.8;
             

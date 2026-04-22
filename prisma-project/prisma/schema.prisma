@@ -52,6 +52,7 @@ model Event {
   externalLink   String?
   createdAt      DateTime   @default(now())
   status         String     @default("OPEN") // OPEN, CLOSED, DRAFT
+  interestedCount Int       @default(0)
 }
 
 model Category {

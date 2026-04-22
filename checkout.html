@@ -556,6 +556,13 @@
                     window.location.href = targetLink;
                     return;
                 }
+
+                // Increment interested count when moving to Step 2
+                if (eventId) {
+                    fetch(`${API_BASE_URL}/api/events/${eventId}/interested`, {
+                        method: 'POST'
+                    }).catch(err => console.error('Failed to increment interest:', err));
+                }
             }
 
             // Validation for Step 2 -> 3 (or handle free)
