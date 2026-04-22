@@ -212,7 +212,40 @@ function checkAuth() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', checkAuth);
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
+    // Inject Poster Modal
+    if (!document.getElementById('poster-modal')) {
+        const modal = document.createElement('div');
+        modal.id = 'poster-modal';
+        modal.className = 'poster-modal';
+        modal.innerHTML = `
+            <div class="poster-modal-content">
+                <span class="poster-close" onclick="closePosterModal()">&times;</span>
+                <img id="poster-img" src="" alt="Event Poster">
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+});
+
+function openPosterModal(imageSrc) {
+    const modal = document.getElementById('poster-modal');
+    const img = document.getElementById('poster-img');
+    if (modal && img) {
+        img.src = imageSrc;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closePosterModal() {
+    const modal = document.getElementById('poster-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
 
 // ─── EVENTS ───
 async function loadEvents(containerId, category = '') {
@@ -233,6 +266,14 @@ async function loadEvents(containerId, category = '') {
                     <img src="${event.image || 'https://via.placeholder.com/600x400'}" alt="${event.title}" style="width:100%; height:100%; object-fit:cover;">
                     <span class="card-tag">${event.categories.map(c => c.name).join(', ')}</span>
                     <span class="card-price">$${event.price}</span>
+                    ${event.descriptionDoc ? `
+                        <button class="briefcase-btn" onclick="openPosterModal('${event.descriptionDoc}')" title="View Brief Case (Poster)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                            </svg>
+                        </button>
+                    ` : ''}
                 </div>
                 <div class="card-body">
                     <div class="card-date">${new Date(event.date).toLocaleDateString()} · ${event.location}</div>
