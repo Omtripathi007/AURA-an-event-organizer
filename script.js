@@ -82,9 +82,11 @@ if (menuToggle) {
         const isHostDash = document.querySelector('.dashboard-layout') || document.querySelector('.main-dash');
         if (isHostDash) {
             const sidebar = document.querySelector('.sidebar') || document.querySelector('aside');
+            const overlay = document.querySelector('.sidebar-overlay');
             if (sidebar) {
                 menuToggle.classList.toggle('active');
                 sidebar.classList.toggle('active');
+                if (overlay) overlay.classList.toggle('active');
             } else {
                 console.warn('Sidebar not found for mobile toggle');
             }
