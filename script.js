@@ -260,12 +260,28 @@ async function loadEvents(containerId, category = '') {
         const response = await fetch(url);
         const events = await response.json();
 
-        container.innerHTML = events.map(event => `
+        container.innerHTML = events.map(event => {
+            const regCount = event.bookings ? event.bookings.length : 0;
+            const capacity = event.capacity || 100; // Fallback if capacity not set
+            const isFillingFast = regCount > 0 && (regCount / capacity) >= 0.8;
+            
+            // Attractive registration badge
+            let regBadge = '';
+            if (regCount > 0) {
+                const badgeClass = isFillingFast ? 'reg-badge-warning' : 'reg-badge-info';
+                const badgeText = isFillingFast 
+                    ? `🔥 Filling Fast! ${regCount} joined` 
+                    : `✨ ${regCount}+ Registered`;
+                regBadge = `<div class="reg-badge ${badgeClass}">${badgeText}</div>`;
+            }
+
+            return `
             <div class="event-card reveal visible">
                 <div class="card-img">
                     <img src="${event.image || 'https://via.placeholder.com/600x400'}" alt="${event.title}" style="width:100%; height:100%; object-fit:cover;">
                     <span class="card-tag">${event.categories.map(c => c.name).join(', ')}</span>
                     <span class="card-price">$${event.price}</span>
+                    ${regBadge}
                     ${event.descriptionDoc ? `
                         <button class="briefcase-btn" onclick="openPosterModal('${event.descriptionDoc}')" title="View Brief Case (Poster)">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -285,7 +301,7 @@ async function loadEvents(containerId, category = '') {
                     </div>
                 </div>
             </div>
-        `).join('');
+        `;}).join('');
 
     } catch (error) {
         console.error('Error loading events:', error);
