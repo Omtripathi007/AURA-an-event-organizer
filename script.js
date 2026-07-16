@@ -1,6 +1,6 @@
 window.API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
     ? 'http://localhost:3000' 
-    : 'https://nodejs-production-d2d4.up.railway.app';
+    : 'https://aura-an-event-organizer.onrender.com';
 
 
 // ─── CURSOR ───
